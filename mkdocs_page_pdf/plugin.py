@@ -38,7 +38,12 @@ class PageToPdfPlugin(BasePlugin):
     def on_pre_build(self, config):
         try:
             print('Run headless browser for pdf rendering')
-            self.browser = asyncio.get_event_loop().run_until_complete(launch())
+            self.browser = asyncio.get_event_loop().run_until_complete(launch(args=[
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-setuid-sandbox",
+                "--no-sandbox"
+            ]))
             self.page = asyncio.get_event_loop().run_until_complete(self.browser.newPage())
         except RuntimeError:
             print(asyncio.all_tasks())
