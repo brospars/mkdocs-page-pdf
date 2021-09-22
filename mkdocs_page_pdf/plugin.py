@@ -29,12 +29,19 @@ class PageToPdfPlugin(BasePlugin):
                 }
             })
 
-        print('Page to pdf ' + outputpath + filename)
+        print('Page to pdf ' + os.path.join(outputpath, filename))
 
     def on_pre_build(self, config):
         print('Open browser')
         self.browser = asyncio.get_event_loop().run_until_complete(launch())
         self.page = asyncio.get_event_loop().run_until_complete(self.browser.newPage())
+
+    def add_link(self, output_content, url):
+        icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 10.5h1v3h-1v-3m-5 1h1v-1H7v1M20 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2M9.5 10.5A1.5 1.5 0 0 0 8 9H5.5v6H7v-2h1a1.5 1.5 0 0 0 1.5-1.5v-1m5 0A1.5 1.5 0 0 0 13 9h-2.5v6H13a1.5 1.5 0 0 0 1.5-1.5v-3m4-1.5h-3v6H17v-2h1.5v-1.5H17v-1h1.5V9z"></path></svg>'
+        link = '<a class="md-content__button md-icon" download href="'+ url +'" title="PDF">' + icon + '</a>'
+        output_content = output_content.replace('<article class="md-content__inner md-typeset">', '<article class="md-content__inner md-typeset">' + link)
+
+        return output_content
 
     def on_post_page(self, output_content, page, config):
         if not self.enabled:
@@ -49,6 +56,8 @@ class PageToPdfPlugin(BasePlugin):
         pdf_filename = filename + '.pdf'
 
         asyncio.get_event_loop().run_until_complete(self.page_to_pdf(output_content, path, pdf_filename))
+
+        output_content = self.add_link(output_content, pdf_filename)
         return output_content
 
     def on_post_build(self, config):
