@@ -17,7 +17,8 @@ setup(
     install_requires=[
         'mkdocs>=1.1',
         'pyppeteer>=0.2',
-        'asyncio>=1.5'
+        'asyncio>=1.5',
+        'nest-asyncio>=1.5'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
