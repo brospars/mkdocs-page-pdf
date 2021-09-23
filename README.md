@@ -51,7 +51,14 @@ Depending on what image you are using you may encounter some issue running `pypp
 This is due to some missing shared librairies used by Chrome Headless. 
 
 Related issue : https://github.com/pyppeteer/pyppeteer/issues/194  
-See this [article](https://www.cloudsavvyit.com/13461/how-to-run-puppeteer-and-headless-chrome-in-a-docker-container/) and this [guide](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker)  
+See this [article](https://www.cloudsavvyit.com/13461/how-to-run-puppeteer-and-headless-chrome-in-a-docker-container/)
+and this [guide](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker)  
 Ready-to-use docker image : https://github.com/brospars/docker-mkdocs
 
+## Special thanks
+
+This plugin was inspired by [mkdocs-with-pdf](https://github.com/orzih/mkdocs-with-pdf)
+and [mkdocs-pdf-export-plugin](https://github.com/zhaoterryy/mkdocs-pdf-export-plugin)
+but without using `weasyprint` but instead `pyppeteer` (chrome headless) to have a render 
+closer to what you have in your chrome browser.
 
