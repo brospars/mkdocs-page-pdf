@@ -43,4 +43,15 @@ Options are directly induced from [pyppeteer options](https://pyppeteer.github.i
   * ``bottom`` (str): Bottom margin, accepts values labeled with units, defaults to ``20px``.
   * ``left`` (str): Left margin, accepts values labeled with units, defaults to ``20px``.
 
+### Troubleshooting
+
+#### Running in a docker container (ci/cd) 
+
+Depending on what image you are using you may encounter some issue running `pyppeteer` : `Browser closed unexpectedly`
+This is due to some missing shared librairies used by Chrome Headless. 
+
+Related issue : https://github.com/pyppeteer/pyppeteer/issues/194  
+See this [article](https://www.cloudsavvyit.com/13461/how-to-run-puppeteer-and-headless-chrome-in-a-docker-container/) and this [guide](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker)  
+Ready-to-use docker image : https://github.com/brospars/docker-mkdocs
+
 
