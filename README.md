@@ -1,6 +1,7 @@
 # Mkdocs Page to PDF
 
-An Mkdocs plugin to generate a PDF file for each MkDocs page.
+An Mkdocs plugin to generate a PDF file for each MkDocs page using `pyppeteer` (chrome headless) 
+and add a download button.
 
 ## How to use
 
@@ -59,6 +60,6 @@ Ready-to-use docker image : https://github.com/brospars/docker-mkdocs
 
 This plugin was inspired by [mkdocs-with-pdf](https://github.com/orzih/mkdocs-with-pdf)
 and [mkdocs-pdf-export-plugin](https://github.com/zhaoterryy/mkdocs-pdf-export-plugin)
-but without using `weasyprint` but instead `pyppeteer` (chrome headless) to have a render 
+but without using `weasyprint` and instead `pyppeteer` (chrome headless) to have a render 
 closer to what you have in your chrome browser.
 
