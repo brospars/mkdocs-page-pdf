@@ -4,12 +4,23 @@ import tempfile
 import nest_asyncio
 from pyppeteer import launch
 from mkdocs.plugins import BasePlugin
-
+from mkdocs.config import config_options
 
 nest_asyncio.apply()
 
 
 class PageToPdfPlugin(BasePlugin):
+    config_scheme = (
+        ('scale', config_options.Type(int, default=1)),
+        ('printBackground', config_options.Type(bool, default=False)),
+        ('displayHeaderFooter', config_options.Type(bool, default=False)),
+        ('headerTemplate', config_options.Type(str, default="")),
+        ('footerTemplate', config_options.Type(str, default="")),
+        ('landscape', config_options.Type(bool, default=False)),
+        ('pageRanges', config_options.Type(str, default="")),
+        ('format', config_options.Type(str, default="A4")),
+        ('margin', config_options.Type(dict, default={'top': "20px", 'bottom': "20px", 'left': "20px", 'right': "20px"}))
+    )
 
     def __init__(self):
         self.browser = None
@@ -23,14 +34,15 @@ class PageToPdfPlugin(BasePlugin):
             await self.page.goto('file://' + temp.name)
             await self.page.pdf({
                 'path': os.path.join(outputpath, filename),
-                'printBackground': True,
-                'format': "A4",
-                'margin': {
-                    'top': "20px",
-                    'bottom': "40px",
-                    'left': "20px",
-                    'right': "20px"
-                }
+                'scale': self.config['scale'],
+                'printBackground': self.config['printBackground'],
+                'displayHeaderFooter': self.config['displayHeaderFooter'],
+                'headerTemplate': self.config['headerTemplate'],
+                'footerTemplate': self.config['footerTemplate'],
+                'landscape': self.config['landscape'],
+                'pageRanges': self.config['pageRanges'],
+                'format': self.config['format'],
+                'margin': self.config['margin']
             })
 
         print('Page to pdf ' + os.path.join(outputpath, filename))
