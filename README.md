@@ -16,7 +16,7 @@ Enable the plugin in your mkdocs.yml:
 ```yaml
 plugins:
   # - ...
-    - pdf-export # should be last
+    - page-to-pdf # should be last
 ```
 
 ### Options
