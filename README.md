@@ -20,8 +20,17 @@ plugins:
 ```
 
 ### Options
+To set different options use the following syntax.
+```yaml
+plugins:
+  # - ...
+    - page-to-pdf :
+        # Options here
+```
+* ``disable`` (bool): Disable pdf rendering useful to quickly disable it without removing the plugin config. Defaults to ``False``.
+* ``disableOnServe`` (bool): Disable pdf rendering when using `mkdocs serve`. Defaults to ``False``.
 
-Options are directly induced from [pyppeteer options](https://pyppeteer.github.io/pyppeteer/reference.html?highlight=pdf#pyppeteer.page.Page.pdf) :
+The following options are directly induced from [pyppeteer options](https://pyppeteer.github.io/pyppeteer/reference.html?highlight=pdf#pyppeteer.page.Page.pdf) :
 
 * ``scale`` (float): Scale of the webpage rendering, defaults to ``1``.
 * ``displayHeaderFooter`` (bool): Display header and footer.
@@ -55,6 +64,11 @@ Related issue : https://github.com/pyppeteer/pyppeteer/issues/194
 See this [article](https://www.cloudsavvyit.com/13461/how-to-run-puppeteer-and-headless-chrome-in-a-docker-container/)
 and this [guide](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker)  
 Ready-to-use docker image : https://github.com/brospars/docker-mkdocs
+
+#### Slow build on serve
+
+You can use `disable` or `disableOnServe` options to disable the pdf rendering (entirely or on serve) but you can also 
+use the `mkdocs serve --dirtyreload` flag to only rebuild modified files on the fly.
 
 ## Special thanks
 

@@ -11,6 +11,8 @@ nest_asyncio.apply()
 
 class PageToPdfPlugin(BasePlugin):
     config_scheme = (
+        ('disable', config_options.Type(bool, default=False)),
+        ('disableOnServe', config_options.Type(bool, default=False)),
         ('scale', config_options.Type(int, default=1)),
         ('printBackground', config_options.Type(bool, default=False)),
         ('displayHeaderFooter', config_options.Type(bool, default=False)),
@@ -25,7 +27,6 @@ class PageToPdfPlugin(BasePlugin):
     def __init__(self):
         self.browser = None
         self.page = None
-        self.enabled = True
 
     async def page_to_pdf (self, output_content, outputpath, filename):
         # To load properly html contents need to be written to a file so we use a temporary html file
@@ -47,7 +48,18 @@ class PageToPdfPlugin(BasePlugin):
 
         print('Page to pdf ' + os.path.join(outputpath, filename))
 
+    def on_config(self, config):
+        onServe = config['dev_addr'].host+':'+str(config['dev_addr'].port) in config['site_url']
+        if self.config['disable']:
+            print('PDF rendering is disabled')
+        if self.config['disableOnServe'] and onServe:
+            print('PDF rendering is disabled in serve mode')
+            self.config['disable'] = True
+        return config
+
     def on_pre_build(self, config):
+        if self.config['disable']:
+            return
         try:
             print('Run headless browser for pdf rendering')
             self.browser = asyncio.get_event_loop().run_until_complete(launch(args=[
@@ -68,7 +80,7 @@ class PageToPdfPlugin(BasePlugin):
         return output_content
 
     def on_post_page(self, output_content, page, config):
-        if not self.enabled:
+        if self.config['disable']:
             return output_content
         abs_dest_path = page.file.abs_dest_path
         src_path = page.file.src_path
@@ -85,5 +97,7 @@ class PageToPdfPlugin(BasePlugin):
         return output_content
 
     def on_post_build(self, config):
+        if self.config['disable']:
+            return
         print('Close headless browser')
         asyncio.get_event_loop().run_until_complete(self.browser.close())
