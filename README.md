@@ -52,6 +52,9 @@ The following options are directly induced from [pyppeteer options](https://pypp
   * ``right`` (str): Right margin, accepts values labeled with units, defaults to ``20px``.
   * ``bottom`` (str): Bottom margin, accepts values labeled with units, defaults to ``20px``.
   * ``left`` (str): Left margin, accepts values labeled with units, defaults to ``20px``.
+* ``pageLoadOptions`` (dict): Page load options (see [this](https://pyppeteer.github.io/pyppeteer/reference.html?highlight=goto#pyppeteer.page.Page.goto)).
+  * ``timeout`` (int): Maximum time in milliseconds, defaults to ``30000``.
+  * ``waitUntil`` (str): When to consider navigation succeeded, defaults to ``load``.
 
 ### Troubleshooting
 

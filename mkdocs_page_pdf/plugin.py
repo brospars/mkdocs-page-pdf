@@ -21,7 +21,8 @@ class PageToPdfPlugin(BasePlugin):
         ('landscape', config_options.Type(bool, default=False)),
         ('pageRanges', config_options.Type(str, default="")),
         ('format', config_options.Type(str, default="A4")),
-        ('margin', config_options.Type(dict, default={'top': "20px", 'bottom': "20px", 'left': "20px", 'right': "20px"}))
+        ('margin', config_options.Type(dict, default={'top': "20px", 'bottom': "20px", 'left': "20px", 'right': "20px"})),
+        ('pageLoadOptions', config_options.Type(dict, default={'timeout': 30000, 'waitUntil': "load"}))
     )
 
     def __init__(self):
@@ -32,7 +33,7 @@ class PageToPdfPlugin(BasePlugin):
         # To load properly html contents need to be written to a file so we use a temporary html file
         with tempfile.NamedTemporaryFile(suffix='.html', dir=outputpath) as temp:
             temp.write(bytes(output_content, encoding='utf-8'))
-            await self.page.goto('file://' + temp.name)
+            await self.page.goto('file://' + temp.name, options=self.config['pageLoadOptions'])
             await self.page.pdf({
                 'path': os.path.join(outputpath, filename),
                 'scale': self.config['scale'],
