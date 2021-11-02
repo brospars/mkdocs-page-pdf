@@ -13,7 +13,7 @@ class PageToPdfPlugin(BasePlugin):
     config_scheme = (
         ('disable', config_options.Type(bool, default=False)),
         ('disableOnServe', config_options.Type(bool, default=False)),
-        ('scale', config_options.Type(float, default=1)),
+        ('scale', config_options.Type(float, default=1.0)),
         ('printBackground', config_options.Type(bool, default=False)),
         ('displayHeaderFooter', config_options.Type(bool, default=False)),
         ('headerTemplate', config_options.Type(str, default="")),

@@ -32,7 +32,7 @@ plugins:
 
 The following options are directly induced from [pyppeteer options](https://pyppeteer.github.io/pyppeteer/reference.html?highlight=pdf#pyppeteer.page.Page.pdf) :
 
-* ``scale`` (float): Scale of the webpage rendering, defaults to ``1``.
+* ``scale`` (float): Scale of the webpage rendering, defaults to ``1.0``.
 * ``displayHeaderFooter`` (bool): Display header and footer.
   Defaults to ``False``.
 * ``headerTemplate`` (str): HTML template for the print header. Should
