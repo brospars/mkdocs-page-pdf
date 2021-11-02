@@ -2,6 +2,7 @@ import asyncio
 import os
 import tempfile
 import nest_asyncio
+from bs4 import BeautifulSoup
 from pyppeteer import launch
 from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
@@ -11,6 +12,7 @@ nest_asyncio.apply()
 
 class PageToPdfPlugin(BasePlugin):
     config_scheme = (
+        ('combined', config_options.Type(bool, default=False)),
         ('disable', config_options.Type(bool, default=False)),
         ('disableOnServe', config_options.Type(bool, default=False)),
         ('scale', config_options.Type(float, default=1.0)),
@@ -28,6 +30,7 @@ class PageToPdfPlugin(BasePlugin):
     def __init__(self):
         self.browser = None
         self.page = None
+        self.combinedHtml = ''
 
     async def page_to_pdf (self, output_content, outputpath, filename):
         # To load properly html contents need to be written to a file so we use a temporary html file
@@ -80,8 +83,18 @@ class PageToPdfPlugin(BasePlugin):
 
         return output_content
 
+    def combine(self, output_content):
+        soup = BeautifulSoup(output_content)
+
+        for main in soup.find_all('.md-content'):
+            self.combinedHtml = self.combinedHtml + str(main)
+
     def on_post_page(self, output_content, page, config):
         if self.config['disable']:
+            return output_content
+        if self.config['combined']:
+            self.combine(output_content)
+            print('Creating combined pdf')
             return output_content
         abs_dest_path = page.file.abs_dest_path
         src_path = page.file.src_path
@@ -100,5 +113,8 @@ class PageToPdfPlugin(BasePlugin):
     def on_post_build(self, config):
         if self.config['disable']:
             return
+        if self.config['combined']:
+            print('Creating combined pdf')
+            asyncio.get_event_loop().run_until_complete(self.page_to_pdf(self.combinedHtml, '.', 'combined.pdf'))
         print('Close headless browser')
         asyncio.get_event_loop().run_until_complete(self.browser.close())
