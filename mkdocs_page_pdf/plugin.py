@@ -2,6 +2,7 @@ import asyncio
 import os
 import tempfile
 import nest_asyncio
+from pathlib import PurePath
 from pyppeteer import launch
 from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
@@ -22,7 +23,8 @@ class PageToPdfPlugin(BasePlugin):
         ('pageRanges', config_options.Type(str, default="")),
         ('format', config_options.Type(str, default="A4")),
         ('margin', config_options.Type(dict, default={'top': "20px", 'bottom': "20px", 'left': "20px", 'right': "20px"})),
-        ('pageLoadOptions', config_options.Type(dict, default={'timeout': 30000, 'waitUntil': "load"}))
+        ('pageLoadOptions', config_options.Type(dict, default={'timeout': 30000, 'waitUntil': "load"})),
+        ('exclude', config_options.Type(list, default=[]))
     )
 
     def __init__(self):
@@ -81,6 +83,10 @@ class PageToPdfPlugin(BasePlugin):
         return output_content
 
     def on_post_page(self, output_content, page, config):
+        for pattern in self.config['exclude']:
+            if PurePath(page.file.src_path).match(pattern):
+                print('File excluded : ' + page.file.src_path)
+                return output_content
         if self.config['disable']:
             return output_content
         abs_dest_path = page.file.abs_dest_path

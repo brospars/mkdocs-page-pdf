@@ -55,6 +55,7 @@ The following options are directly induced from [pyppeteer options](https://pypp
 * ``pageLoadOptions`` (dict): Page load options (see [this](https://pyppeteer.github.io/pyppeteer/reference.html?highlight=goto#pyppeteer.page.Page.goto)).
   * ``timeout`` (int): Maximum time in milliseconds, defaults to ``30000``.
   * ``waitUntil`` (str): When to consider navigation succeeded, defaults to ``load``.
+* ``exclude`` (list) : List of glob pattern to exclude
 
 ### Troubleshooting
 
