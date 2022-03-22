@@ -6,6 +6,7 @@ from pathlib import PurePath
 from pyppeteer import launch
 from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
+from jinja2 import Template
 
 nest_asyncio.apply()
 
@@ -30,8 +31,12 @@ class PageToPdfPlugin(BasePlugin):
     def __init__(self):
         self.browser = None
         self.page = None
+        self.header_template = ''
+        self.footer_template = ''
 
     async def page_to_pdf (self, output_content, outputpath, filename):
+        header_template = self.header_template
+        footer_template = self.footer_template
         # To load properly html contents need to be written to a file so we use a temporary html file
         with tempfile.NamedTemporaryFile(suffix='.html', dir=outputpath) as temp:
             temp.write(bytes(output_content, encoding='utf-8'))
@@ -41,8 +46,8 @@ class PageToPdfPlugin(BasePlugin):
                 'scale': self.config['scale'],
                 'printBackground': self.config['printBackground'],
                 'displayHeaderFooter': self.config['displayHeaderFooter'],
-                'headerTemplate': self.config['headerTemplate'],
-                'footerTemplate': self.config['footerTemplate'],
+                'headerTemplate': header_template,
+                'footer_template': footer_template,
                 'landscape': self.config['landscape'],
                 'pageRanges': self.config['pageRanges'],
                 'format': self.config['format'],
@@ -81,6 +86,14 @@ class PageToPdfPlugin(BasePlugin):
         output_content = output_content.replace('<article class="md-content__inner md-typeset">', '<article class="md-content__inner md-typeset">' + link)
 
         return output_content
+
+    def on_page_context(self, context, page, config, nav):
+        # Use Jinja to replace mustache tags by variable in header and footer templates
+        header_template = Template(self.config['headerTemplate'])
+        self.header_template = header_template.render(context)
+        footer_template = Template(self.config['footerTemplate'])
+        self.footer_template = footer_template.render(context)
+        return context
 
     def on_post_page(self, output_content, page, config):
         for pattern in self.config['exclude']:
