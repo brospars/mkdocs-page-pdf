@@ -47,7 +47,7 @@ class PageToPdfPlugin(BasePlugin):
                 'printBackground': self.config['printBackground'],
                 'displayHeaderFooter': self.config['displayHeaderFooter'],
                 'headerTemplate': header_template,
-                'footer_template': footer_template,
+                'footerTemplate': footer_template,
                 'landscape': self.config['landscape'],
                 'pageRanges': self.config['pageRanges'],
                 'format': self.config['format'],
@@ -98,7 +98,7 @@ class PageToPdfPlugin(BasePlugin):
     def on_post_page(self, output_content, page, config):
         for pattern in self.config['exclude']:
             if PurePath(page.file.src_path).match(pattern):
-                print('File excluded : ' + page.file.src_path)
+                print('File excluded : ' + page.file.src_path + ' ' + pattern)
                 return output_content
         if self.config['disable']:
             return output_content
