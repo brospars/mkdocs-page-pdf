@@ -57,7 +57,7 @@ class PageToPdfPlugin(BasePlugin):
         print('Page to pdf ' + os.path.join(outputpath, filename))
 
     def on_config(self, config):
-        onServe = config['dev_addr'].host+':'+str(config['dev_addr'].port) in config['site_url']
+        onServe = config['site_url'] is not None and config['dev_addr'].host+':'+str(config['dev_addr'].port) in config['site_url']
         if self.config['disable']:
             print('PDF rendering is disabled')
         if self.config['disableOnServe'] and onServe:
