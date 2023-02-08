@@ -42,7 +42,7 @@ The following options are directly induced from [pyppeteer options](https://pypp
   * ``url``: document location
   * ``pageNumber``: current page number
   * ``totalPages``: total pages in the document
-* ``footerTemplate`` (str): HTML template for the print footer. Should use the same template as ``headerTemplate``.
+* ``footerTemplate`` (str): HTML template for the print footer. Should be valid HTML markup with the same classes as ``headerTemplate``.
 * ``printBackground`` (bool): Print background graphics. Defaults to``False``.
 * ``landscape`` (bool): Paper orientation. Defaults to ``False``.
 * ``pageRanges`` (string): Paper ranges to print, e.g., '1-5,8,11-13'. Defaults to empty string, which means all pages.
@@ -73,6 +73,16 @@ Ready-to-use docker image : https://github.com/brospars/docker-mkdocs
 
 You can use `disable` or `disableOnServe` options to disable the pdf rendering (entirely or on serve) but you can also 
 use the `mkdocs serve --dirtyreload` flag to only rebuild modified files on the fly.
+
+#### Blank page at the end
+
+Due to a [chrome bug](https://github.com/brospars/mkdocs-page-pdf/issues/9) a blank page can appear at the end of the PDF you can remove it by addin the following to you extra.css :
+
+```css
+body {
+    contain: strict;
+}
+```
 
 ## Special thanks
 
