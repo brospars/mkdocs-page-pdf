@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='mkdocs-page-pdf',
-    version='0.1.0',
+    version='0.1.1',
     description='Generate a PDF file for each MkDocs page',
     long_description=io.open('README.md', encoding='utf8').read(),
     long_description_content_type='text/markdown',
