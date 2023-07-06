@@ -79,8 +79,8 @@ use the `mkdocs serve --dirtyreload` flag to only rebuild modified files on the 
 Due to a [chrome bug](https://github.com/brospars/mkdocs-page-pdf/issues/9) a blank page can appear at the end of the PDF you can remove it by addin the following to you extra.css :
 
 ```css
-body {
-    contain: strict;
+@media print {
+    body { contain: content; }
 }
 ```
 
