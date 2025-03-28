@@ -32,6 +32,7 @@ class PageToPdfPlugin(BasePlugin):
     def __init__(self):
         self.browser = None
         self.page = None
+        self.download_link = ''
         self.header_template = ''
         self.footer_template = ''
 
@@ -82,14 +83,16 @@ class PageToPdfPlugin(BasePlugin):
             print(asyncio.all_tasks())
 
     def add_link(self, output_content, url):
-        icon = self.config['downloadLink']
+        icon = self.download_link
         link = '<a class="md-content__button md-icon" download href="'+ url +'" title="PDF">' + icon + '</a>'
         output_content = output_content.replace('<article class="md-content__inner md-typeset">', '<article class="md-content__inner md-typeset">' + link)
 
         return output_content
 
     def on_page_context(self, context, page, config, nav):
-        # Use Jinja to replace mustache tags by variable in header and footer templates
+        # Use Jinja to replace mustache tags by variable in download link, header and footer templates
+        download_link = Template(self.config['downloadLink'])
+        self.download_link = download_link.render(context)
         header_template = Template(self.config['headerTemplate'])
         self.header_template = header_template.render(context)
         footer_template = Template(self.config['footerTemplate'])
