@@ -26,7 +26,7 @@ class PageToPdfPlugin(BasePlugin):
         ('format', config_options.Type(str, default="A4")),
         ('margin',
          config_options.Type(dict, default={'top': "20px", 'bottom': "20px", 'left': "20px", 'right': "20px"})),
-        ('pageLoadOptions', config_options.Type(dict, default={'timeout': 30000, 'waitUntil': "load"})),
+        ('pageLoadOptions', config_options.Type(dict, default={'timeout': 10000, 'waitUntil': "load"})),
         ('exclude', config_options.Type(list, default=[])),
         ('downloadLink', config_options.Type(str,
                                              default='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 10.5h1v3h-1v-3m-5 1h1v-1H7v1M20 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2M9.5 10.5A1.5 1.5 0 0 0 8 9H5.5v6H7v-2h1a1.5 1.5 0 0 0 1.5-1.5v-1m5 0A1.5 1.5 0 0 0 13 9h-2.5v6H13a1.5 1.5 0 0 0 1.5-1.5v-3m4-1.5h-3v6H17v-2h1.5v-1.5H17v-1h1.5V9z"></path></svg>')),
@@ -47,19 +47,25 @@ class PageToPdfPlugin(BasePlugin):
         with tempfile.NamedTemporaryFile(suffix='.html', dir=outputpath) as temp:
             temp.write(bytes(output_content, encoding='utf-8'))
             page = await self.browser.newPage()
-            await page.goto('file://' + temp.name, options=self.config['pageLoadOptions'])
-            await page.pdf({
-                'path': os.path.join(outputpath, filename),
-                'scale': self.config['scale'],
-                'printBackground': self.config['printBackground'],
-                'displayHeaderFooter': self.config['displayHeaderFooter'],
-                'headerTemplate': header_template,
-                'footerTemplate': footer_template,
-                'landscape': self.config['landscape'],
-                'pageRanges': self.config['pageRanges'],
-                'format': self.config['format'],
-                'margin': self.config['margin']
-            })
+            try:
+                await page.goto('file://' + temp.name, options=self.config['pageLoadOptions'])
+            except Exception as e:
+                print(f"Warning: Some resources may not have loaded: {e}")
+            try:
+                await page.pdf({
+                    'path': os.path.join(outputpath, filename),
+                    'scale': self.config['scale'],
+                    'printBackground': self.config['printBackground'],
+                    'displayHeaderFooter': self.config['displayHeaderFooter'],
+                    'headerTemplate': header_template,
+                    'footerTemplate': footer_template,
+                    'landscape': self.config['landscape'],
+                    'pageRanges': self.config['pageRanges'],
+                    'format': self.config['format'],
+                    'margin': self.config['margin']
+                })
+            except Exception as e:
+                print(f"Warning: Failed to convert the page to PDF: {e}")
             await page.close()
         elapsed_time = time.time() - start_time
         print(f'Page to PDF {os.path.join(outputpath, filename)} completed in {elapsed_time:.2f} seconds')
