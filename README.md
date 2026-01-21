@@ -103,8 +103,8 @@ Alternatively, use the `disableOnServe` option to disable PDF generation during 
 Due to a Chromium bug, a blank page may appear at the end of the PDF. To fix this, add the following CSS to your `extra.css`:
 
 ```css
-body {
-    contain: strict;
+@media print {
+    body { contain: content; }
 }
 ```
 
