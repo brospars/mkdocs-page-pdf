@@ -42,6 +42,7 @@ plugins:
 #### General Options
 - **`disable`** (bool): Disable PDF rendering. Useful for quickly disabling the plugin without removing its configuration. Default: `False`.
 - **`disableOnServe`** (bool): Disable PDF rendering when using `mkdocs serve`. Default: `False`.
+- **`concurrency`** (int): Maximum number of pages rendered to PDF at the same time. Higher values speed up the build but use more memory (each page is a Chromium tab). Use `1` for sequential rendering. Default: `min(4, number of CPUs)`.
 
 #### PDF Rendering Options
 The following options are based on [Playwright's PDF generation capabilities](https://playwright.dev/python/docs/api/class-page#page-pdf):
@@ -87,6 +88,18 @@ Use a ready-to-use Docker image with all dependencies pre-installed:
 If you prefer to set up your own image, refer to:
 - [Playwright Docker Guide](https://playwright.dev/docs/docker)
 - [Puppeteer Troubleshooting in Docker](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker)
+
+
+### Out of Memory in CI
+If the build crashes or gets killed on a CI runner with limited memory, lower the `concurrency` option. You can use MkDocs' `!ENV` tag to set it only in CI:
+
+```yaml
+plugins:
+  - page-to-pdf:
+      concurrency: !ENV [PDF_CONCURRENCY, 4]
+```
+
+Then set `PDF_CONCURRENCY=1` (or `2`) in your CI environment.
 
 
 ### Slow Build on Serve

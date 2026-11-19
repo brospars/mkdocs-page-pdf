@@ -1,19 +1,19 @@
 import asyncio
 import os
 import tempfile
-import nest_asyncio
 from pathlib import PurePath
 from playwright.async_api import async_playwright
 from mkdocs.plugins import BasePlugin
 from mkdocs.config import config_options
 from jinja2 import Template
 
-nest_asyncio.apply()
+DEFAULT_CONCURRENCY = min(4, os.cpu_count() or 1)
 
 class PageToPdfPlugin(BasePlugin):
     config_scheme = (
         ('disable', config_options.Type(bool, default=False)),
         ('disableOnServe', config_options.Type(bool, default=False)),
+        ('concurrency', config_options.Type(int, default=DEFAULT_CONCURRENCY)),
         ('scale', config_options.Type(float, default=1.0)),
         ('printBackground', config_options.Type(bool, default=False)),
         ('displayHeaderFooter', config_options.Type(bool, default=False)),
@@ -29,7 +29,9 @@ class PageToPdfPlugin(BasePlugin):
     )
 
     def __init__(self):
+        self.loop = None
         self.browser = None
+        self.tasks = []
         self.download_link = ''
         self.header_template = ''
         self.footer_template = ''
@@ -44,13 +46,14 @@ class PageToPdfPlugin(BasePlugin):
         return config
 
     def on_pre_build(self, config):
+        self.tasks = []
         if self.config['disable']:
             return
 
         async def _launch_browser():
             try:
-                playwright = await async_playwright().start()
-                self.browser = await playwright.chromium.launch(
+                self.playwright = await async_playwright().start()
+                self.browser = await self.playwright.chromium.launch(
                     args=[
                         "--disable-gpu",
                         "--disable-dev-shm-usage",
@@ -64,7 +67,8 @@ class PageToPdfPlugin(BasePlugin):
                 self.browser = None
 
         print("Launching browser for PDF rendering...")
-        asyncio.get_event_loop().run_until_complete(_launch_browser())
+        self.loop = asyncio.new_event_loop()
+        self.loop.run_until_complete(_launch_browser())
 
     def page_to_pdf(self, output_content, outputpath, filename):
         if self.browser is None:
@@ -81,36 +85,39 @@ class PageToPdfPlugin(BasePlugin):
         async def _generate_pdf():
             page = await self.browser.new_page()
             try:
-                await page.goto(
-                    f'file://{temp_path}',
-                    wait_until=self.config['pageLoadOptions']['waitUntil'],
-                    timeout=self.config['pageLoadOptions']['timeout']
-                )
-            except Exception as e:
-                print(f"Warning: Page load timeout or error for {temp_path}: {e}")
-                return
+                try:
+                    await page.goto(
+                        f'file://{temp_path}',
+                        wait_until=self.config['pageLoadOptions']['waitUntil'],
+                        timeout=self.config['pageLoadOptions']['timeout']
+                    )
+                except Exception as e:
+                    print(f"Warning: Page load timeout or error for {temp_path}: {e}")
+                    return
 
-            try:
-                await page.pdf(
-                    path=os.path.join(outputpath, filename),
-                    scale=self.config['scale'],
-                    print_background=self.config['printBackground'],
-                    display_header_footer=self.config['displayHeaderFooter'],
-                    header_template=header_template,
-                    footer_template=footer_template,
-                    landscape=self.config['landscape'],
-                    page_ranges=self.config['pageRanges'],
-                    format=self.config['format'],
-                    margin=self.config['margin']
-                )
-            except Exception as e:
-                print(f"Warning: PDF render failed for {temp_path}: {e}")
-                return
+                try:
+                    await page.pdf(
+                        path=os.path.join(outputpath, filename),
+                        scale=self.config['scale'],
+                        print_background=self.config['printBackground'],
+                        display_header_footer=self.config['displayHeaderFooter'],
+                        header_template=header_template,
+                        footer_template=footer_template,
+                        landscape=self.config['landscape'],
+                        page_ranges=self.config['pageRanges'],
+                        format=self.config['format'],
+                        margin=self.config['margin']
+                    )
+                except Exception as e:
+                    print(f"Warning: PDF render failed for {temp_path}: {e}")
+                    return
+            finally:
+                await page.close()
+                os.unlink(temp_path)
+            if os.path.exists(os.path.join(outputpath, filename)):
+                print(f"PDF generated: {os.path.join(outputpath, filename)}")
 
-        asyncio.get_event_loop().run_until_complete(_generate_pdf())
-        os.unlink(temp_path)
-        if os.path.exists(os.path.join(outputpath, filename)):
-            print(f"PDF generated: {os.path.join(outputpath, filename)}")
+        self.tasks.append(_generate_pdf())
 
     def add_link(self, output_content, url):
         icon = self.download_link
@@ -150,11 +157,24 @@ class PageToPdfPlugin(BasePlugin):
         if self.config['disable'] or self.browser is None:
             return
 
+        async def _run_tasks():
+            semaphore = asyncio.Semaphore(max(1, self.config['concurrency']))
+
+            async def _limited(task):
+                async with semaphore:
+                    await task
+
+            await asyncio.gather(*(_limited(task) for task in self.tasks))
+
+        self.loop.run_until_complete(_run_tasks())
+
         async def _close_browser():
             try:
-                await self.browser.stop()
+                await self.browser.close()
+                await self.playwright.stop()
                 print("Browser closed successfully.")
             except Exception as e:
                 print(f"Warning: Failed to close browser: {e}")
 
-        asyncio.get_event_loop().run_until_complete(_close_browser())
+        self.loop.run_until_complete(_close_browser())
+        self.loop.close()

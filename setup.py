@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='mkdocs-page-pdf',
-    version='0.4.0',
+    version='0.5.0',
     description='Generate a PDF file for each MkDocs page',
     long_description=io.open('README.md', encoding='utf8').read(),
     long_description_content_type='text/markdown',
@@ -17,8 +17,7 @@ setup(
     install_requires=[
         'mkdocs>=1.1',
         'playwright>=1.57',
-        'asyncio>=1.5',
-        'nest-asyncio>=1.5'
+        'asyncio>=1.5'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
